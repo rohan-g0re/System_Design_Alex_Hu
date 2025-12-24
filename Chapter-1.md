@@ -152,3 +152,95 @@ while (master.down()){
 }
 
 ```
+
+
+# Caching Tier
+
+- either should use for storing RESULTS OF expensicve responses
+- or store Frequently accessed data
+
+
+### Advantages
+
+1. IMPORTANT --> if we have a separate cache tier then scaling and maintaining it is easy as compared to a utiliy added yo the servers itself -->  give us the **ability to scale the cache tier independently**
+
+2. better performance
+
+3. reduces DB workloads --> as every request might not be gping to DB anynmore
+
+
+### Simple Woking: 
+
+1. if data in cache, retrieve directly
+2. else retrieve from db and store it in db 
+
+```cpp
+
+Data execute (required_data){
+
+    if (cache.find(required_data) != cache.end()){
+        return required_data;
+    }
+    else{
+        Data temp = db.find(required_data);
+        cache.save(temp);
+        return temp;
+    }
+
+}
+
+```
+
+### Properties
+
+#### 1. Expiration Policy
+- it is basically like a TTL for the data in cache and the data is expired from cache after that time 
+- it can be in form of time unit (eg: 10 seconds, 1 day) or in access units (if not accessed in 100 accesses) or something else
+- if there is no expiration policy, it means that cache data will be permanently in memory
+
+#### 2. Eviction Policy 
+- if the cache is full and the data cant be evicted based on the Expiration Policy / TTL then we need an eviction policy to **MAKE ROOM FOR NEW DATA**
+- LRU is a famous option
+
+### Insights
+
+
+#### 1. Choice of when to use a cache
+1. **Consider using cache when data is read frequently but modified infrequently.**
+
+2.  Since cached data is stored in **volatile memory**, a cache server is not ideal **since IF IT RESTARTS**, all the data in memory is lost --> Thus, important data should be saved in persistent data stores.
+
+
+#### 2. Maintaining concisitency between actual data and cache
+
+1. They can diverge because the data modifying operations are done on the DB, and not on cache
+
+```cpp
+
+void crud_ops(data_block, operation){
+
+    Data block_to_work_on = db.find(data_block);
+    db.execute(block_to_work_on, operation);
+
+
+    // basically if we have the same block in cache, we need to replace it
+    // also remember that this restarts all the counts for the data block -> example: frequency of accesses
+
+
+    if (cache.find ( block_to_work_on.id() ) != cache.end()){
+        cache.replace( "that_block", block_to_work_on);
+    }
+
+}
+
+
+```
+
+
+#### 3. Mitigating SPOF (Sinle Point of Failures)
+
+- this can happen if we have single cache server
+
+**MITIGATIONS**: 
+1. multiple cache servers 
+2. Overprovision the required memory by certain percentages which provides a buffer as the memory usage increases.
