@@ -291,3 +291,22 @@ in stateless:
     
 ```
 
+# Data Centres
+
+- just as how CDN used a work with the closest CDN --> **SIMILARLY** Data centres have a function called geoDNS.
+
+- **geoDNS is a DNS service that allows domain names to be resolved to IP addresses based on the location of a user.**
+
+
+### Challenges of Multiple data centers
+
+1. Traffic redirection to different server --> can use a geoDNS
+
+2. Data synchroization --> we miight have non-consistent copies of data accross different centers --> a siimple technique to solve this is replication of data accoss data centers
+
+3. Test and deplpoyment takes time as we need to test the workign of app in all the regions
+
+
+# What we have built till now
+
+![1766596661488](image/Chapter-1/1766596661488.png)
