@@ -87,7 +87,6 @@ while (slave.down()){
 
 ```
 
-
 #### 2. If multiple slaves available -- and all one goes down
 
 ```cpp
@@ -95,7 +94,7 @@ while (slave.down()){
 // 1. redirect requests to other slaves 
 
 while (slave.down()){
-    
+  
     if(check_slave == True){
         int slave_tag = get_slave_tag();
         redirect(read_operation, slave_tag);
@@ -106,10 +105,7 @@ while (slave.down()){
 // ADDITIONAL --> till then you can add a new server 
 ```
 
-
-
 #### 3. Master Down
-
 
 ```cpp
 /*
@@ -131,7 +127,7 @@ while (master.down()){
     master = slave;
 
     // 2. any pending operations can be optionally done on master
-    
+  
     while (slave_setup == false){
         for (auto operation : pending_operations){
             execute(master, operation);
@@ -141,9 +137,9 @@ while (master.down()){
 
 
 // IMPORTANT --> THIS SALVE SETUP WILL BE DINE PARALLELY SO THAT THE STEP 2 will stop as sson as this is done
-    
+  
     // 3. slave setup:
-    
+  
     for (auto slave : slaves){
         replace(slave, master.replica());;
 
@@ -153,26 +149,21 @@ while (master.down()){
 
 ```
 
-
 # Caching Tier
 
 - either should use for storing RESULTS OF expensicve responses
 - or store Frequently accessed data
 
-
 ### Advantages
 
 1. IMPORTANT --> if we have a separate cache tier then scaling and maintaining it is easy as compared to a utiliy added yo the servers itself -->  give us the **ability to scale the cache tier independently**
-
 2. better performance
-
 3. reduces DB workloads --> as every request might not be gping to DB anynmore
 
-
-### Simple Woking: 
+### Simple Woking:
 
 1. if data in cache, retrieve directly
-2. else retrieve from db and store it in db 
+2. else retrieve from db and store it in db
 
 ```cpp
 
@@ -194,22 +185,22 @@ Data execute (required_data){
 ### Properties
 
 #### 1. Expiration Policy
-- it is basically like a TTL for the data in cache and the data is expired from cache after that time 
+
+- it is basically like a TTL for the data in cache and the data is expired from cache after that time
 - it can be in form of time unit (eg: 10 seconds, 1 day) or in access units (if not accessed in 100 accesses) or something else
 - if there is no expiration policy, it means that cache data will be permanently in memory
 
-#### 2. Eviction Policy 
+#### 2. Eviction Policy
+
 - if the cache is full and the data cant be evicted based on the Expiration Policy / TTL then we need an eviction policy to **MAKE ROOM FOR NEW DATA**
 - LRU is a famous option
 
 ### Insights
 
-
 #### 1. Choice of when to use a cache
+
 1. **Consider using cache when data is read frequently but modified infrequently.**
-
-2.  Since cached data is stored in **volatile memory**, a cache server is not ideal **since IF IT RESTARTS**, all the data in memory is lost --> Thus, important data should be saved in persistent data stores.
-
+2. Since cached data is stored in **volatile memory**, a cache server is not ideal **since IF IT RESTARTS**, all the data in memory is lost --> Thus, important data should be saved in persistent data stores.
 
 #### 2. Maintaining concisitency between actual data and cache
 
@@ -236,11 +227,36 @@ void crud_ops(data_block, operation){
 
 ```
 
-
 #### 3. Mitigating SPOF (Sinle Point of Failures)
 
 - this can happen if we have single cache server
 
-**MITIGATIONS**: 
-1. multiple cache servers 
+**MITIGATIONS**:
+
+1. multiple cache servers
 2. Overprovision the required memory by certain percentages which provides a buffer as the memory usage increases.
+
+# Content delivery network (CDN)
+
+##### CDN is a network of geographically dispersed servers used to deliver content. CDN servers POPULARLY cache static content like images, videos, CSS, JavaScript files, etc.
+
+##### Recent advancements have led to "DYNAMIC CONTENT CACHING" which enables the caching of HTML pages that are based on request path, query strings, cookies, and request headers.
+
+dont really know the differnce between cache and CDN --> most probably would be by the things it provides - data vs assets --> but I wpuld need a  better definition
+
+### Considerations
+
+1.  CDNs are run by third-party providers, and you are charged for data transfers in and out of the CDN. Caching infrequently used assets provides no significant benefits so you should consider moving them out of the CDN.
+
+2. we need a cache expiry policy -- similar to expiration policy in cache
+
+3. we need a CDN fallback process which routes requests directly to server if CDN is down --> PRETTY LOGICAL INNIT!?!
+
+4. Invalidating files -->  something similar to eviction policy --> here we have given ways of how we can remove them
+    - 4.1 invalidate the object itself using function
+    - 4.2 use object versioning so that we make the previous object invalid and replace it by new one, which will be the relevant one
+
+
+# TILL NOW WE HAVE BUILT THIS
+
+![1766594080804](image/Chapter-1/1766594080804.png)
