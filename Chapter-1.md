@@ -260,3 +260,34 @@ dont really know the differnce between cache and CDN --> most probably would be 
 # TILL NOW WE HAVE BUILT THIS
 
 ![1766594080804](image/Chapter-1/1766594080804.png)
+
+
+# Horizontally Scaling the Web Tier --> USING Stateless Web Tier over Stateful Tier
+
+## Stateful architectures
+
+```cpp
+
+in stateful: 
+    1. the state/session data is REMEMBERED by the server for every client
+    2. Therefore if we scale keep this architecture and scale horixzontally into multiple servers --> there will be a problem
+    3. the requests STILL NEED TO BE ROUTED TO THE SERVER WHICH HAS THE USER DATA
+    4. therefore, no real advantage of scaling as the users just got segregated amongst the servers
+
+```
+
+![1766594798573](image/Chapter-1/1766594798573.png)
+
+
+
+## Stateless architectures
+
+```cpp
+
+in stateless: 
+    1. the state/session data is stored in a SHARED STORAGE which can be used by all the servers
+    2. Therefore if we scale this architecture horixzontally into multiple servers --> the requests CAN BE SENT TO ANY WEB-SERVER 
+    3. This not only helps in routing every request efficiently but also we have SUCCESSFULLY DETACHED THE SESSION LAYER from the WEB SERVER
+    
+```
+
