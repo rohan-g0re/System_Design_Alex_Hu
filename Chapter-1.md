@@ -22,10 +22,10 @@
 
 ### When to use:
 
-• Your application requires super-low latency.
-• Your data are unstructured, or you do not have any relational data.
-• You only need to serialize and deserialize data (JSON, XML, YAML, etc.).
-• You need to store a massive amount of data
+- Your application requires super-low latency.
+- Your data are unstructured, or you do not have any relational data.
+- You only need to serialize and deserialize data (JSON, XML, YAML, etc.).
+- You need to store a massive amount of data
 
 # Vertical and Horizontal Scaling
 
@@ -59,16 +59,15 @@ AFter adding a load balancer and a second web server, we successfully SOLVED **n
 
 ## Database Replication
 
-###### It is generally created in a master slave architecture such that the MASTER DB MAKES REPLICAS WHICH ARE INDEED CALLED AS SLAVE DBs
+### It is generally created in a master slave architecture such that the MASTER DB MAKES REPLICAS WHICH ARE CALLED AS SLAVE DBs
 
 Properties:
-    - writes ONLY in master
-    - reads only from slaves
+   - writes ONLY in master
+   - reads only from slaves
 
 ### Advantages:
 
 1. Better Performance:
-
    - reason 1: operations are on separate entitites (read and writes)
    - reason 2: reads can be distributed across replicas
 2. reliability && high availabilty --> due to data being present in multiple replicas
@@ -87,7 +86,7 @@ while (slave.down()){
 
 ```
 
-#### 2. If multiple slaves available -- and all one goes down
+#### 2. If multiple slaves available -- and one goes down
 
 ```cpp
 
@@ -102,7 +101,7 @@ while (slave.down()){
 }
 
 
-// ADDITIONAL --> till then you can add a new server 
+// ADDITIONAL --> till then you can add a new slave/server 
 ```
 
 #### 3. Master Down
@@ -136,7 +135,7 @@ while (master.down()){
 
 
 
-// IMPORTANT --> THIS SALVE SETUP WILL BE DINE PARALLELY SO THAT THE STEP 2 will stop as sson as this is done
+// IMPORTANT --> THIS SALVE SETUP WILL BE DONE PARALLELY SO THAT THE STEP 2 will stop as sson as this is done
   
     // 3. slave setup:
   
@@ -151,7 +150,7 @@ while (master.down()){
 
 # Caching Tier
 
-- either should use for storing RESULTS OF expensicve responses
+- either should use for storing RESULTS OF expensive responses
 - or store Frequently accessed data
 
 ### Advantages
@@ -310,3 +309,24 @@ in stateless:
 # What we have built till now
 
 ![1766596661488](image/Chapter-1/1766596661488.png)
+
+
+
+# MESSAGE QUEUE
+
+- stored in memory
+- helps in the implementation of architecture of **PUB-SUB model**
+
+
+
+# Logging, metrics, automation
+
+just that we need this
+
+
+# Database Scaling
+
+## Vertical Scaling
+
+## Horizontal Scaling
+
