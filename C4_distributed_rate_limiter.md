@@ -1,3 +1,5 @@
+    
+
 ## [Helpful Video](https://www.youtube.com/watch?v=MIJFyUPG4Z4)
 
 ## Principles:
@@ -63,7 +65,14 @@ Origin = kitchen + vault + accountant.
 
 We can keep a service like **Zookeeper** where its complete task is to push any changes in the rules that it contains to the API gateway. So, we do not need to constantly keep on pulling the current rule config from any file nor do we need to redeploy with new configs. If there is any change, developers can change it in the Zookeeper, and then for the upcoming requests, it will be pushed to the API gateway, and the upcoming requests will be tackled according to it according to the new config.
 
-
 ## Architecture from Video
 
 <img src="image/Chapter-4/1771449392147.png" alt="Architecture Diagram" width="69%">
+
+## Architecture from Book
+
+<img src="image/C4_distributed_rate_limiter/1771449688231.png" alt="1771449688231" width="69%">
+
+#### For distributed architecture where we have multiple rate limiters on different servers:
+
+<img src="image/C4_distributed_rate_limiter/1771449730567.png" alt="1771449730567" width="40%">
