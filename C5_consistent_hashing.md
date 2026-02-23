@@ -30,6 +30,8 @@ I think there are two problems when normal hashing fails and redistribution happ
 
 ## Consistent Hashing with Virtual Nodes
 
+<img src="image/C5_consistent_hashing/1771875643902.png" alt="consistent hashing with virtual nodes" width="100%">
+
 - Virtual nodes are basically added on the ring which REPRESENT an actual server. For example: Instead of using s0 only --> we have s0_0, s0_1, and s0_2 to represent server 0 on the ring.
 
 - As the number of virtual nodes increases, the distribution of keys becomes more balanced.This is because the standard deviation gets smaller with more virtual nodes, leading to balanced data distribution.
