@@ -49,7 +49,76 @@ The CAP theorem states that it is **impossible for a distributed system to provi
 
 # 6. Inconsistency resolution: versioning
 
-#### STILL DONT KNOW THIS: Did not understand anything about version clocks.
+### Versioning with Vector Clocks (Concise Notes + Tiny Example)
+
+**Goal:** In an AP (eventually consistent) KV-store, different replicas may accept **concurrent writes**. Vector clocks help detect whether one version is **newer** or if there’s a **real conflict**.
+
+#### What a Vector Clock is
+
+A metadata map:
+`VC = {node_id: counter}`
+
+#### How it updates
+
+When replica/node `A` writes key `K`:
+
+* take existing VC (or zeros)
+* increment `A`’s counter
+* store `(value, VC)`
+
+#### How to compare two versions
+
+Given `VCx` and `VCy`:
+
+* If `VCx[i] ≥ VCy[i]` for all i **and** `>` for at least one i → **x dominates y** → x is newer → drop y
+* If neither dominates → **concurrent** → keep both (“siblings”) → must merge
+
+---
+
+## Tiny example (2 nodes: A, B)
+
+Initial value for key `K`:
+
+* `K = v1`, `VC1 = {A:0, B:0}`
+
+Network partition happens (A and B can’t sync).
+
+### Concurrent writes
+
+1. Node A writes:
+
+* `K = v2`, `VC2 = {A:1, B:0}`
+
+2. Node B writes:
+
+* `K = v3`, `VC3 = {A:0, B:1}`
+
+Compare `VC2` vs `VC3`:
+
+* `VC2` higher at A, lower at B → neither dominates → **conflict**
+  So store siblings:
+* `K = { (v2, {A:1,B:0}), (v3, {A:0,B:1}) }`
+
+### Reconcile
+
+Client/app merges them → `v4` (domain logic).
+
+Merged write by A:
+
+* base = max componentwise: `{A:1, B:1}`
+* increment writer A → `VC4 = {A:2, B:1}`
+
+Now `VC4` dominates both `VC2` and `VC3`, so system can keep only:
+
+* `K = v4`, `VC4`
+
+That’s the whole idea.
+
+
+
+
+-------------------------------------------
+
 
 # 7. Handling Failures
 
