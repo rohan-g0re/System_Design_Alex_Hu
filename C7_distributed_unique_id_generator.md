@@ -32,7 +32,8 @@
 
 ## 1.3 Ticket Server
 
-- a central server issuing IDs like tickets
+- A dedicated service gives out ranges: node A gets [1..1M], node B gets [1M+1..2M]
+- **Each node increments locally within its assigned block**
 - SPOF (Single Point Of Failure)
 
 ## 1.4 IMPORTANT --> Twitter Snowflake Approach

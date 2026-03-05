@@ -7,10 +7,16 @@
 
 
 # Status Codes
-200: Ok
-429: Too Many requests
-301: redirect --> 
-302: redirect --> 
+**200** OK: fetched link metadata  
+**201** Created: created a new short link  
+**301** Moved Permanently: cache-friendly redirect  
+**302** Found: redirect but keep coming back (good for analytics control)  
+**400** Bad Request: invalid URL, missing fields  
+**401** Unauthorized / **403** Forbidden: auth issues  
+**404** Not Found: code doesn’t exist  
+**409** Conflict: custom alias already taken  
+**429** Too Many Requests: rate-limited  
+**500**/**503**: server issues
 
 
 # Random Facts
