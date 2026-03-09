@@ -1,25 +1,77 @@
-# Book Arcihtecture
-
-Question: They said: "URL Filter: The URL filter excludes certain content types, file extensions, error links and URLs in “blacklisted” sites." what does this mean and what does this do?
-
-Question: what does this even mean? What is the priority of URLs, and then they say that you do prioritize URLs based on page rank. What does that even mean?--> "Standard BFS (Breadth-First Search) does not consider the priority or significance of URLs; since the web contains a vast range of pages with varying quality and importance, we often prefer to prioritize URLs based on metrics like page rank, web traffic, or update frequency."
-
-
-Question: am I correct in saying that the seed URL component is just storing URLs, whereas the URL Frontier is responsible for the prioritizing as well as the scheduling of the URLs? Based on the URL Frontier's job, the HTML downloader will be able to pull the respective URL and work upon it.
-
-Question: Using the content scene module could have been a product design, could be a product decision, I think, because there might be cases in which, even if the content is similar, we would need to scrape it. Again, we are dealing with data with respect to what webpage it is on. Even if, let's say, the same article is on the New York Times as well as Times News, we still want it because we want to say that the same article was published by n number of news outlets. For that reason, we actually need to have that. Again, in this type of use case, maybe we can just say that it was similar and update accordingly, but maybe, when archiving, something like an archiving use case, we need to store all the articles, no matter if they are exactly similar.
+A crawler can be used for different purposes:
+- Search engine indexing: A crawler collects web pages to create a local index for search engines.
+- Web archiving: This is the process of collecting information from the web to preserve data for future uses. For Eg: many national libraries run crawlers to archive web sites.
+- Web mining: Just Data mining to discover useful knowledge from the internet.
+- Web monitoring. The crawlers help to monitor copyright and trademark infringements over the Internet.
 
 
-Question. One more thing: if the only aim was of the content seen, I think the main aim I would say is to not have similar content scraped again or crawled over again. The complete hash of the web page is not useful, because let's assume that there will be some minor tweaks and two almost identical articles, but those tweaks are going to change the hash. It's still going to look at it as two different articles. In this case, we might need to chunk it and then perform a hash. If the hashes of the majority hashes are similar, then we can say that, okay, it is. It may be most similar, so there should be some type of similarity score which can again also be implemented using a vector DB. Chunking plus hashing seems like a more realistic approach. What do you think?
+## Functional Requirements
+- scrape the complete html
+- currently no need of scraping images, videos or documents
+- **PAGES WITH DUPLICATE CONTENT SHOULUD BE IGNORED**
+
+## Non - Functional Requirements
+- 1 billion pages per month
+- store all the data for 5 years
+- high scalability needed --> hence parallelization needed
+- EXTENSIBILITY --> Tomorrow, if we need to add crawling for images, we should not need to change the complete architecture.
+- politeness to websites needed
 
 
-Question. It is said over here that for content storage we can use a disk as well as memory, but isn't that something out of our scope? We can definitely propose it, but I think how we store the content and how it is later used for later purposes is a different thing. For example, how we store it will be different in case that we have to do analytics over that data, or we have to index over that data, create an index over that data, or we have to train maybe an LLM over that data. Storing may be different, right? Just want to confirm.
+## High Level Design - Getting a Buy In
 
-Question: In the URL extractor, it says that relative parts are converted to absolute URLs by adding the current URL prefix. I think it is a great approach, but also tell me that there will be some hyperlinks which go to different websites. How does that handle? We need to mention it that way, right? How do we mention it? What's the basic approach we will have in URL extractor such that some of the links will be added to the prefix of the current URL, and some of the links, as they are to other websites, will be added directly?
+<img src="image/C9_web_crawler/1773002357727.png" alt="High Level Design of Web Crawler" style="zoom:70%;" />
+
+**Step 1:** Add seed URLs to the URL Frontier  
+**Step 2:** HTML Downloader fetches a list of URLs from URL Frontier.  
+**Step 3:** HTML Downloader gets IP addresses of URLs from DNS resolver and starts downloading.  
+**Step 4:** Content Parser parses HTML pages and checks if pages are malformed.  
+**Step 5:** After content is parsed and validated, it is passed to the “Content Seen?” component.  
+**Step 6:** “Content Seen” component checks if a HTML page is already in the storage.  
+        - If it is in the storage, this means the same content in a different URL has already been processed. In this case, the HTML page is discarded.  
+        - If it is not in the storage, the system has not processed the same content before. The content is passed to Link Extractor.  
+**Step 7:** Link extractor extracts links from HTML pages.  
+**Step 8:** Extracted links are passed to the URL filter.  
+**Step 9:** After links are filtered, they are passed to the “URL Seen?” component.  
+**Step 10:** “URL Seen” component checks if a URL is already in the storage, if yes, it is processed before, and nothing needs to be done.  
+**Step 11:** If a URL has not been processed before, it is added to the URL Frontier.  
 
 
 
-Question: here we have a URL storage, and it's said that URL storage stores already visited URLs. As you can see in the diagram, if a URL is not seen before, that's the output by the URL scene component; then the URL goes to the URL frontier. I think it was supposed to go to the seed URLs component, right, because the CD URLs component is the actual place where we have the unvisited URLs stored. Maybe that's a database as well. What's this CD URLs component then, because I think it should go to the CD URLs, and there we can store it again, store the new links again.
+
+# Deep Dive in Components
+
+## 1. DFS or BFS --> we choose BFS because DFS's depth is crazy
+
+- if there are any other links in the html page we will go forward and crawl them as well
+##### for the hyperlinks --> there can be 2 cases:
+    1. Type 1: link to website of same domain
+    2. Type 2: link to a different website
+
+HOW DO WE HANDLE DIFFERENT TYPES OF HYPERLINKS:
+
+1. Case 1: Type 1 with complete link --> push directly to queue
+2. Case 2: Type 1 with RELATIVE link --> add the prefix of website and then push to queue 
+3. Case 3: Type 2 always be with absolute link --> push directly
+ 
+###### LOGIC BELOW
+
+- HTML pages can contain URLs in two main formats:
+    - **Absolute URLs** (e.g. `https://example.com/a/b`)
+    - **Root-relative URLs** (e.g. `/a/b`, which refers to the same host as the current page)
+
+- The Link Extractor should handle:
+    - **URL canonicalization** (normalize URLs to a standard form)
+    - **URL resolution** (convert relative/root-relative links to full absolute URLs using the context of the current page)
+
+- URL extraction procedure:
+    - Determine the base URL of the current page (e.g. `https://news.site.com/section/page.html`)
+    - For each hyperlink found:
+        - If the link is an absolute URL (starts with `http://` or `https://`), keep it (after canonicalizing)
+        - If the link is a root-relative URL (starts with `/`), prepend the scheme and host from the base:  
+          e.g. `/a` becomes `https://news.site.com/a`
+
+
 
 
 ## URL FRONTIER POLITENESS
@@ -71,3 +123,16 @@ This was an excerpt from the book. What do we do in this situation?
 
 # Database replication and sharding
 Techniques like replication and sharding are used to improve the data layer availability, scalability, and reliability. So this was again an excerpt from the book. What do you suggest? Where should we have database replication and sharding, or maybe just sharding, or maybe where we should have the database in the first place where we do not have it currently? Tell me your thoughts. Again, not to be over-engineering stuff, but I need actual practical ways where it will make sense.
+
+
+
+
+
+# REMARKS
+
+[1]. If "seed urls" is just a set of urls then --> url frontier will have some type of persistent storage attached |||||| if not then it means that "seed urls "is absically a storage which initially was filled with seed urls and now NEW URLS can be appended to it (storage or a queue like structure)
+
+
+[2]. Using the "content scene?" module is a product decision --> **AND HENCE NEEDS TO BE CLARIFIED IN REQUIREMENT PHASE** --> because there might be cases in which, even if the content is similar, we would need to crawl & scrape it. For example: a same article is on the New York Times as well as Times News, we still want it because we want to say that the same article was published by n number of news outlets. Another example: For web archiving, we need to store the similar articles on different websites.
+
+[3]. *ALSO ALSO ALSO -->* if the only aim of the "content seen?" module was to NOT HAVE similar content scraped again then the hash of the web page is not useful, because let's assume that there will be some minor tweaks, but those tweaks are going to change the hash. It's still going to look at it as two different articles. --> **In this case, we might need to chunk it and then perform a hash**. **If the hashes of the majority chunks are similar, then we can say that2 articles are similar and dont need to be saved**. - there can be a threshold of percentage of chunks. -->  ALSO there can be **completely different approach** of a **SIMILARITY SCORE** which can be implemented using a **vector DB**.
