@@ -44,3 +44,6 @@ same time.
 - WebSocket connections generally work even if a firewall is in place.
 - This is because they use port 80 or 443, which are also used by HTTP/HTTPS connections.
 - Use WebSocket on the sender as well as the receiver side because it is bi-directional and does not have the limitation that HTTP had.
+
+
+
