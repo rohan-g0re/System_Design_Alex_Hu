@@ -22,3 +22,5 @@
 # Random Facts
 
 1. Whenever we require an alphanumeric string, remember that we can use base 62 encoding, which allows characters from 0-9, A-Z, and a-z. This, in total, makes 62 characters. Therefore if we have a string of 7 characters we can have **62^7 = 3.5 trillion unique combinations**.
+
+2. NoSQL databases do not provide an auto increment feature for keys.
